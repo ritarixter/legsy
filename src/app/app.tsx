@@ -12,42 +12,48 @@ const App = () => {
   const listId = useAppSelector((state) => state.table.listId);
   const list = useAppSelector((state) => state.table.list);
   const listPhoto = useAppSelector((state) => state.table.listPhoto);
+  const [rowdata, setrowData] = useState<Array<any>>([])
   useEffect(() => {
     dispatch(getCards());
   }, []);
 
-  const data = useMemo(
+
+  let data = useMemo(
     () =>
-      list.map((item) => ({
-        id: item.id,
-        brand: item.brand,
-        price: item.priceU / 100,
-        name: item.name,
-        photo: "",
-        graph: graph,
-      })),
+      list.map((item) => {
+       return{
+        'Номенклатура': item.id,
+        'Бренд': item.brand,
+        'Цена': item.priceU / 100,
+        'Название': item.name,
+        'Фото': '',
+        'График заказов': graph,}
+      }),
     [list]
   );
-  console.log(data);
 
-  const [rowData, setRowData] = useState([
-    { Фото: "Toyota", model: "Celica", price: 35000 },
-    { make: "Ford", model: "Mondeo", price: 32000 },
-    { make: "Porsche", model: "Boxster", price: 72000 },
-  ]);
+  useMemo(()=>data.forEach((item) => {
+    Object.keys(listPhoto).forEach((itemPhoto) => {
+      if (item.Номенклатура === Number(itemPhoto)) {
+        item.Фото = listPhoto[Number(itemPhoto)];
+      }
+    });
+  }),[list])
+
+  console.log(data);
 
   const [columnDefs] = useState([
     { field: "Фото" },
-    { field: "make" },
-    { field: "Номенклатура" },
-    { field: "Бренд" },
-    { field: "Цена" },
+    { field: "Номенклатура", filter: true },
+    { field: "Название", filter: true },
+    { field: "Бренд",filter: true },
+    { field: "Цена",filter: true },
     { field: "График заказов" },
   ]);
 
   return (
     <div className="ag-theme-alpine" style={{ height: 400 }}>
-      <AgGridReact rowData={rowData} columnDefs={columnDefs}></AgGridReact>
+      <AgGridReact rowData={data} columnDefs={columnDefs}></AgGridReact>
     </div>
   );
 };
